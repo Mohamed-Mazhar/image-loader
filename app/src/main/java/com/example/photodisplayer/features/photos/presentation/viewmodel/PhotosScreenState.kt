@@ -1,7 +1,7 @@
-package com.example.photodisplayer.features.photos.presentation.viewmodels
+package com.example.photodisplayer.features.photos.presentation.viewmodel
 
 
-import com.example.photodisplayer.features.photos.presentation.viewmodels.viewentity.MarvelCharacterViewEntity
+import com.example.photodisplayer.features.photos.presentation.viewmodel.viewentity.MarvelCharacterViewEntity
 
 data class PhotosScreenState(
     val photos: List<MarvelCharacterViewEntity> = emptyList(),

@@ -1,4 +1,4 @@
-package com.example.photodisplayer.features.photos.presentation.viewmodels.viewentity
+package com.example.photodisplayer.features.photos.presentation.viewmodel.viewentity
 
 data class MarvelCharacterViewEntity(
     val id: String,

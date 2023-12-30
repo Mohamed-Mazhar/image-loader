@@ -7,9 +7,9 @@ import com.example.photodisplayer.features.photos.domain.usecases.GetMarvelChara
 class GetMarvelCharactersUsecaseProvider private constructor() {
 
     companion object {
-        fun getMarvelCharactersUsecase(): GetMarvelCharactersUsecase {
+        fun get(): GetMarvelCharactersUsecase {
             return GetMarvelCharactersUsecaseImpl(
-                imageRepository = ImageRepositoryProvider.getImageRepositoryProvider()
+                imageRepository = ImageRepositoryProvider.get()
             )
         }
     }

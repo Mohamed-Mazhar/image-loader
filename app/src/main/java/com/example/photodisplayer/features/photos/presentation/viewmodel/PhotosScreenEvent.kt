@@ -1,4 +1,4 @@
-package com.example.photodisplayer.features.photos.presentation.viewmodels
+package com.example.photodisplayer.features.photos.presentation.viewmodel
 
 sealed class PhotosScreenEvent {
     data object ScreenLaunchedEvent : PhotosScreenEvent()
