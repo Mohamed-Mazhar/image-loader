@@ -2,7 +2,6 @@
 
 package com.example.photodisplayer.features.photos.presentation.screen
 
-import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -48,6 +47,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.photodisplayer.common.theme.AccentColor
@@ -56,32 +56,31 @@ import com.example.photodisplayer.common.theme.Purple40
 import com.example.photodisplayer.common.theme.Purple80
 import com.example.photodisplayer.common.ui.Screen
 import com.example.photodisplayer.features.photos.presentation.viewmodel.PhotosScreenEvent
-import com.example.photodisplayer.features.photos.presentation.viewmodel.PhotosScreenState
+import com.example.photodisplayer.features.photos.presentation.viewmodel.PhotosViewModel
 
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun PhotoListScreen(
     navController: NavController,
-    photosScreenState: PhotosScreenState,
-    onAppEvent: (PhotosScreenEvent) -> Unit
+    photosViewModel : PhotosViewModel = viewModel(factory = PhotosViewModel.Factory)
 ) {
     val pullRefreshState = rememberPullRefreshState(
-        refreshing = photosScreenState.isLoading,
+        refreshing = photosViewModel.state.isLoading,
         onRefresh = {
-            onAppEvent(PhotosScreenEvent.RefreshPageEvent)
+            photosViewModel.onEvent(PhotosScreenEvent.RefreshPageEvent)
         }
     )
     LaunchedEffect(key1 = Unit) {
-        onAppEvent(PhotosScreenEvent.ScreenLaunchedEvent)
+        photosViewModel.onEvent(PhotosScreenEvent.ScreenLaunchedEvent)
     }
     Scaffold(
         topBar = {
             QuerySearch(
-                query = photosScreenState.query,
+                query = photosViewModel.state.query,
                 label = "Search",
                 onQueryChanged = {
-                    onAppEvent(PhotosScreenEvent.SearchFieldChangedEvent(it))
+                    photosViewModel.onEvent(PhotosScreenEvent.SearchFieldChangedEvent(it))
                 }
             )
         },
@@ -105,7 +104,7 @@ fun PhotoListScreen(
                     horizontalAlignment = Alignment.Start,
                     contentPadding = PaddingValues(16.dp)
                 ) {
-                    items(photosScreenState.filteredPhotos) {
+                    items(photosViewModel.state.filteredPhotos) {
                         Card(
                             elevation = CardDefaults.cardElevation(
                                 defaultElevation = 10.dp
@@ -114,7 +113,6 @@ fun PhotoListScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable {
-                                    Log.d("Marvel", "Navigating to next screen $it")
                                     navController.navigate(
                                         Screen.PhotoDetailsScreen.route.replace("{id}", it.id)
                                     )
@@ -154,10 +152,10 @@ fun PhotoListScreen(
                     }
                 }
                 PullRefreshIndicator(
-                    refreshing = photosScreenState.isLoading,
+                    refreshing = photosViewModel.state.isLoading,
                     state = pullRefreshState,
                     modifier = Modifier.align(Alignment.TopCenter),
-                    backgroundColor = if (photosScreenState.isLoading) Purple40 else Purple80,
+                    backgroundColor = if (photosViewModel.state.isLoading) Purple40 else Purple80,
                 )
             }
         }

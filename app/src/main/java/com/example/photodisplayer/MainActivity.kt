@@ -10,6 +10,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -41,29 +42,18 @@ class MainActivity : ComponentActivity() {
                     },
                 ) {
                     composable(Screen.PhotoListScreen.route) {
-                        val viewModel: PhotosViewModel by viewModels { PhotosViewModel.Factory }
-                        val screenState = viewModel.state
                         PhotoListScreen(
                             navController = navController,
-                            photosScreenState = screenState
-                        ) {
-                            viewModel.onEvent(event = it)
-                        }
+                        )
                     }
                     composable(
                         route = Screen.PhotoDetailsScreen.route,
                     ) {
                         val id = it.arguments?.getString("id")
                         id?.let { photoId ->
-                            val viewModel: PhotoDetailsViewModel by viewModels { PhotoDetailsViewModel.Factory }
-                            val screenState = viewModel.state
                             PhotoDetailsScreen(
                                 navController = navController,
                                 id = photoId,
-                                screenState = screenState,
-                                onAppEvent = { event ->
-                                    viewModel.onEvent(event)
-                                }
                             )
                         }
                     }
