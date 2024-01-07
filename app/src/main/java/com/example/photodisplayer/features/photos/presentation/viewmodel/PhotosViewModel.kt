@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.example.photodisplayer.common.network.WebserviceException
 import com.example.photodisplayer.features.photos.dependencies.usecases.GetMarvelCharactersUsecaseProvider
 import com.example.photodisplayer.features.photos.dependencies.usecases.RefreshMarvelCharactersUsecaseProvider
 import com.example.photodisplayer.features.photos.domain.usecases.GetMarvelCharactersUsecase
@@ -49,6 +50,7 @@ class PhotosViewModel(
                 }
 
                 is PhotosScreenEvent.ScreenLaunchedEvent -> loadPhotos()
+                is PhotosScreenEvent.DismissErrorDialog -> state = state.copy(errorMessage = "")
             }
         }
     }
@@ -67,12 +69,16 @@ class PhotosViewModel(
 
     private suspend fun refreshCharacters() {
         state = state.copy(isLoading = true)
-        refreshMarvelCharactersUsecase.execute()
-        val photos = getPhotosUsecase.execute()
-        val viewEntities = photos.map {
-            MarvelCharacterViewEntityMapper.toViewEntity(it)
+        state = try {
+            refreshMarvelCharactersUsecase.execute()
+            val photos = getPhotosUsecase.execute()
+            val viewEntities = photos.map {
+                MarvelCharacterViewEntityMapper.toViewEntity(it)
+            }
+            state.copy(photos = viewEntities, isLoading = false, filteredPhotos = viewEntities)
+        } catch (e: WebserviceException) {
+            state.copy(errorMessage = e.errorMessage, isLoading = false)
         }
-        state = state.copy(photos = viewEntities, isLoading = false, filteredPhotos = viewEntities)
     }
 
     private fun updateFilteredList(query: String) {

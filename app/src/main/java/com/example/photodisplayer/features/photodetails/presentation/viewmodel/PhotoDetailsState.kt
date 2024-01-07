@@ -4,5 +4,6 @@ import com.example.photodisplayer.features.photos.domain.entities.MarvelCharacte
 
 data class PhotoDetailsState(
     val marvelCharacter: MarvelCharacter? = null,
-    val updateCompleted: Boolean = false
+    val updateCompleted: Boolean = false,
+    val isLoading: Boolean = false,
 )

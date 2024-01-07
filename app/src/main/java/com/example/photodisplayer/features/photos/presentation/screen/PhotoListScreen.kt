@@ -18,6 +18,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.AlertDialog
+import androidx.compose.material.Button
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.icons.Icons
@@ -41,6 +43,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -50,6 +53,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.example.photodisplayer.R
 import com.example.photodisplayer.common.theme.AccentColor
 import com.example.photodisplayer.common.theme.PrimaryColor
 import com.example.photodisplayer.common.theme.Purple40
@@ -63,7 +67,7 @@ import com.example.photodisplayer.features.photos.presentation.viewmodel.PhotosV
 @Composable
 fun PhotoListScreen(
     navController: NavController,
-    photosViewModel : PhotosViewModel = viewModel(factory = PhotosViewModel.Factory)
+    photosViewModel: PhotosViewModel = viewModel(factory = PhotosViewModel.Factory)
 ) {
     val pullRefreshState = rememberPullRefreshState(
         refreshing = photosViewModel.state.isLoading,
@@ -74,11 +78,19 @@ fun PhotoListScreen(
     LaunchedEffect(key1 = Unit) {
         photosViewModel.onEvent(PhotosScreenEvent.ScreenLaunchedEvent)
     }
+    if (photosViewModel.state.errorMessage.isNotBlank()) {
+        ShowAlertDialog(
+            message = photosViewModel.state.errorMessage,
+            onDismiss = {
+                photosViewModel.onEvent(PhotosScreenEvent.DismissErrorDialog)
+            }
+        )
+    }
     Scaffold(
         topBar = {
             QuerySearch(
                 query = photosViewModel.state.query,
-                label = "Search",
+                label = stringResource(id = R.string.search),
                 onQueryChanged = {
                     photosViewModel.onEvent(PhotosScreenEvent.SearchFieldChangedEvent(it))
                 }
@@ -144,7 +156,9 @@ fun PhotoListScreen(
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
-                                    text = it.ellipsizedCaption,
+                                    text = it.ellipsizedCaption.ifEmpty {
+                                        stringResource(id = R.string.no_caption)
+                                    },
                                     overflow = TextOverflow.Ellipsis
                                 )
                             }
@@ -187,5 +201,31 @@ fun QuerySearch(
             focusedIndicatorColor = AccentColor,
         )
 
+    )
+}
+
+@Composable
+fun ShowAlertDialog(
+    message: String,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = {
+            onDismiss()
+        },
+        title = {
+            Text(text = "Error")
+        },
+        text = {
+            Text(text = message)
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    onDismiss()
+                }) {
+                Text("Ok")
+            }
+        }
     )
 }

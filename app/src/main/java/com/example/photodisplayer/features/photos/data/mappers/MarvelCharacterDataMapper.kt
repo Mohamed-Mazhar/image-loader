@@ -1,6 +1,6 @@
 package com.example.photodisplayer.features.photos.data.mappers
 
-import com.example.imageloader.common.util.toHttps
+import com.example.photodisplayer.common.util.toHttps
 import com.example.photodisplayer.features.photos.data.datasources.database.PhotoDatabaseEntity
 import com.example.photodisplayer.features.photos.data.models.MarvelCharacterDataModel
 import com.example.photodisplayer.features.photos.domain.entities.MarvelCharacter

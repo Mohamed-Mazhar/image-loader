@@ -19,11 +19,7 @@ object MarvelCharacterViewEntityMapper {
             caption.substring(0, 80).run {
                 "$this..."
             }
-        } else if (caption.isBlank()) {
-            "No Caption"
-        } else {
-            caption
-        }
+        } else caption
     }
 
 }

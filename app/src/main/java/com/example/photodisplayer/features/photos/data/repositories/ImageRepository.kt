@@ -1,18 +1,20 @@
 package com.example.photodisplayer.features.photos.data.repositories
 
 import com.example.photodisplayer.common.network.ApiHandler
-import com.example.photodisplayer.features.photos.data.datasources.api.MarvelApiService
+import com.example.photodisplayer.features.photos.data.datasources.api.MarvelWebService
 import com.example.photodisplayer.features.photos.data.datasources.database.PhotosDao
 import com.example.photodisplayer.features.photos.data.mappers.MarvelCharacterDataMapper
 import com.example.photodisplayer.features.photos.domain.entities.MarvelCharacter
 
 
 class ImageRepository(
-    private val marvelApiService: MarvelApiService,
+    private val marvelWebService: MarvelWebService,
     private val photosDao: PhotosDao
 ) : ApiHandler() {
 
-    suspend fun getMarvelCharacters() = handle(marvelApiService::getMarvelCharacters) {
+    suspend fun getMarvelCharacters() = handleGetRequestResponse(
+        marvelWebService::getMarvelCharacters
+    ) {
         MarvelCharacterDataMapper.toEntities(
             marvelCharacterDataModels = it.marvelData.results
         )
