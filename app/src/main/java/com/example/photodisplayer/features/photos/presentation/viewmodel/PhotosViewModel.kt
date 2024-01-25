@@ -1,5 +1,6 @@
 package com.example.photodisplayer.features.photos.presentation.viewmodel
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -11,8 +12,10 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.photodisplayer.common.network.WebserviceException
 import com.example.photodisplayer.features.photos.dependencies.usecases.GetMarvelCharactersUsecaseProvider
 import com.example.photodisplayer.features.photos.dependencies.usecases.RefreshMarvelCharactersUsecaseProvider
+import com.example.photodisplayer.features.photos.dependencies.usecases.UpdateImageWidthAndHeightUsecaseProvider
 import com.example.photodisplayer.features.photos.domain.usecases.GetMarvelCharactersUsecase
 import com.example.photodisplayer.features.photos.domain.usecases.RefreshMarvelCharactersUsecase
+import com.example.photodisplayer.features.photos.domain.usecases.UpdateImageWidthAndHeight
 import com.example.photodisplayer.features.photos.presentation.viewmodel.viewentity.MarvelCharacterViewEntityMapper
 import kotlinx.coroutines.launch
 import java.util.Locale
@@ -20,6 +23,7 @@ import java.util.Locale
 class PhotosViewModel(
     private val getPhotosUsecase: GetMarvelCharactersUsecase,
     private val refreshMarvelCharactersUsecase: RefreshMarvelCharactersUsecase,
+    private val updateImageWidthAndHeight: UpdateImageWidthAndHeight,
 ) : ViewModel() {
 
     var state by mutableStateOf(PhotosScreenState())
@@ -30,9 +34,11 @@ class PhotosViewModel(
             initializer {
                 val getPhotosUsecase = GetMarvelCharactersUsecaseProvider.get()
                 val refreshMarvelCharactersUsecase = RefreshMarvelCharactersUsecaseProvider.get()
+                val updateImageWidthAndHeight = UpdateImageWidthAndHeightUsecaseProvider.get()
                 PhotosViewModel(
                     getPhotosUsecase = getPhotosUsecase,
-                    refreshMarvelCharactersUsecase = refreshMarvelCharactersUsecase
+                    refreshMarvelCharactersUsecase = refreshMarvelCharactersUsecase,
+                    updateImageWidthAndHeight = updateImageWidthAndHeight
                 )
             }
         }
@@ -44,15 +50,20 @@ class PhotosViewModel(
                 is PhotosScreenEvent.SearchFieldChangedEvent -> {
                     updateFilteredList(query = event.text)
                 }
-
                 is PhotosScreenEvent.RefreshPageEvent -> {
                     refreshCharacters()
                 }
-
                 is PhotosScreenEvent.ScreenLaunchedEvent -> loadPhotos()
                 is PhotosScreenEvent.DismissErrorDialog -> state = state.copy(errorMessage = "")
+                is PhotosScreenEvent.UpdatePhotoDetails -> updateWidthAndHeight(event.photoId, event.width, event.height)
             }
         }
+    }
+
+    private suspend fun updateWidthAndHeight(photoId: String, width: Int, height: Int) {
+        Log.d("Marvel", "Updating photo size $height and $width")
+        updateImageWidthAndHeight.execute(photoId, width, height)
+        loadPhotos()
     }
 
     private suspend fun loadPhotos() {

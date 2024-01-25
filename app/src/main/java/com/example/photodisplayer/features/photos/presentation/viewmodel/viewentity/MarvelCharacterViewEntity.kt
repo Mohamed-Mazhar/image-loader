@@ -6,4 +6,6 @@ data class MarvelCharacterViewEntity(
     val ellipsizedCaption: String,
     val caption: String,
     val imagePath: String,
+    val height: Int?,
+    val width: Int?
 )

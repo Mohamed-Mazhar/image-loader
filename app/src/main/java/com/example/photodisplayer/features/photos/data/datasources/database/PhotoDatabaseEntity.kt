@@ -17,8 +17,8 @@ data class PhotoDatabaseEntity(
     @ColumnInfo(name = "description")
     val description: String,
     @ColumnInfo(name = "height")
-    val height: Double,
+    val height: Int?,
     @ColumnInfo(name = "width")
-    val width: Double
+    val width: Int?
 
 )

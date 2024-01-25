@@ -45,8 +45,8 @@ object MarvelCharacterDataMapper {
             name = marvelCharacter.name,
             url = marvelCharacter.imagePath,
             description = marvelCharacter.caption,
-            height = marvelCharacter.height ?: 0.0,
-            width = marvelCharacter.width ?: 0.0,
+            height = marvelCharacter.height,
+            width = marvelCharacter.width,
         )
     }
 

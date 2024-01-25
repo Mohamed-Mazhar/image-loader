@@ -1,6 +1,7 @@
 package com.example.photodisplayer.features.photodetails.presentation.screen
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,7 +12,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
@@ -35,6 +41,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -70,17 +77,21 @@ fun PhotoDetailsScreen(
         ShowLoading()
     }
     Column(
-        modifier = Modifier.fillMaxSize().background(Color(backgroundColor))
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .background(Color(backgroundColor))
     ) {
         AsyncImage(
+            modifier = Modifier
+                .width(photoDetailsViewModel.state.marvelCharacter?.width?.dp ?: 0.dp)
+                .height(photoDetailsViewModel.state.marvelCharacter?.height?.dp ?: 0.dp),
             model = ImageRequest.Builder(LocalContext.current)
                 .data(photoDetailsViewModel.state.marvelCharacter?.imagePath)
                 .allowHardware(false)
                 .build(),
             contentDescription = null,
             placeholder = rememberVectorPainter(image = Icons.Default.Person),
-            contentScale = ContentScale.FillWidth,
-            modifier = Modifier.fillMaxWidth(),
             onSuccess = {
                 val bitmap = it.result.drawable.toBitmap()
                 val color = getDominantColor(bitmap)
@@ -94,7 +105,12 @@ fun PhotoDetailsScreen(
                 photoDetailsViewModel.onEvent(PhotoDetailsEvent.CaptionChanged(it))
             },
             placeholder = {
-                Text(text = stringResource(id = R.string.no_caption))
+                Text(
+                    text = stringResource(id = R.string.no_caption),
+                    style = TextStyle(
+                        color = Color(getContrastColor(backgroundColor))
+                    )
+                )
             },
             modifier = Modifier
                 .padding(
@@ -132,6 +148,18 @@ fun PhotoDetailsScreen(
             }
 
         }
+        Spacer(modifier = Modifier.height(8.dp))
+        ImageHeightAndWidth(
+            width = photoDetailsViewModel.state.marvelCharacter?.width,
+            height = photoDetailsViewModel.state.marvelCharacter?.height,
+            onWidthChanged = {
+                photoDetailsViewModel.onEvent(PhotoDetailsEvent.UpdatePhotoWidth(it))
+            },
+            onHeightChanged = {
+                photoDetailsViewModel.onEvent(PhotoDetailsEvent.UpdatePhotoHeight(it))
+            },
+            textColor = backgroundColor
+        )
     }
 }
 
@@ -149,5 +177,63 @@ fun ShowLoading() {
         ) {
             CircularProgressIndicator()
         }
+    }
+}
+
+@Composable
+fun ImageHeightAndWidth(
+    width: Int?,
+    height: Int?,
+    textColor: Int,
+    onWidthChanged: (width: String) -> Unit,
+    onHeightChanged: (height: String) -> Unit,
+) {
+    val contrastColor by remember {
+        mutableStateOf(Color(getContrastColor(textColor)))
+    }
+    Row(
+        modifier = Modifier.padding(start = 16.dp, end = 16.dp),
+    ) {
+        OutlinedTextField(
+            modifier = Modifier.weight(1f),
+            value = if (height != 0) height.toString() else "",
+            onValueChange = onHeightChanged,
+            textStyle = TextStyle(
+                color = contrastColor,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold
+            ),
+            label = {
+                Text(text = "Height")
+            },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = contrastColor,
+                unfocusedBorderColor = contrastColor,
+                focusedLabelColor = contrastColor,
+                unfocusedLabelColor = contrastColor,
+            )
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        OutlinedTextField(
+            modifier = Modifier.weight(1f),
+            value = if (width != 0) width.toString() else "",
+            onValueChange = onWidthChanged,
+            textStyle = TextStyle(
+                color = contrastColor,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold
+            ),
+            label = {
+                Text(text = "Width")
+            },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = contrastColor,
+                unfocusedBorderColor = contrastColor,
+                focusedLabelColor = contrastColor,
+                unfocusedLabelColor = contrastColor,
+            )
+        )
     }
 }

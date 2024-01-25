@@ -30,6 +30,8 @@ class PhotoDetailsViewModel(
     var state by mutableStateOf(PhotoDetailsState())
         private set
 
+    private var aspectRatio: Double = 1.0
+
     companion object {
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
@@ -49,7 +51,31 @@ class PhotoDetailsViewModel(
                 is CaptionChanged -> updatePhotoCaption(caption = event.text)
                 is UpdatePhotoDetails -> updatePhoto()
                 is PhotoDetailsEvent.CompressPhoto -> compressImage()
+                is PhotoDetailsEvent.UpdatePhotoWidth -> updateWidth(event.width.toIntOrNull() ?: 0)
+                is PhotoDetailsEvent.UpdatePhotoHeight -> updateHeight(event.height.toIntOrNull() ?: 0)
             }
+        }
+    }
+
+    private fun updateWidth(width: Int) {
+        state.marvelCharacter?.let {
+            state = state.copy(
+                marvelCharacter = it.copy(
+                    width = width,
+                    height = width.times(1 / aspectRatio).toInt()
+                )
+            )
+        }
+    }
+
+    private fun updateHeight(height: Int) {
+        state.marvelCharacter?.let {
+            state = state.copy(
+                marvelCharacter = it.copy(
+                    height = height,
+                    width = height.times(aspectRatio).toInt()
+                )
+            )
         }
     }
 
@@ -80,6 +106,9 @@ class PhotoDetailsViewModel(
     private suspend fun getPhotoDetails(id: String) {
         val photoDetails = getPhotoByIdUsecase.execute(id)
         state = state.copy(marvelCharacter = photoDetails)
+        if (photoDetails.height != null && photoDetails.width != null) {
+            aspectRatio = (photoDetails.width.toDouble() / photoDetails.height)
+        }
     }
 
 }

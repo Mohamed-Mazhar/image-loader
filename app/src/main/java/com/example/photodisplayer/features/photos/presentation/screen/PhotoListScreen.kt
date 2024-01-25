@@ -42,7 +42,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -67,7 +66,7 @@ import com.example.photodisplayer.features.photos.presentation.viewmodel.PhotosV
 @Composable
 fun PhotoListScreen(
     navController: NavController,
-    photosViewModel: PhotosViewModel = viewModel(factory = PhotosViewModel.Factory)
+    photosViewModel: PhotosViewModel = viewModel(factory = PhotosViewModel.Factory),
 ) {
     val pullRefreshState = rememberPullRefreshState(
         refreshing = photosViewModel.state.isLoading,
@@ -148,10 +147,15 @@ fun PhotoListScreen(
                                     model = it.imagePath,
                                     contentDescription = null,
                                     placeholder = rememberVectorPainter(image = Icons.Default.Person),
-                                    contentScale = ContentScale.FillWidth,
-                                    modifier = Modifier.fillMaxWidth(),
-                                    onSuccess = {
-
+                                    onSuccess = { imageState ->
+                                        val imageDetails = imageState.result
+                                        photosViewModel.onEvent(
+                                            event = PhotosScreenEvent.UpdatePhotoDetails(
+                                                photoId = it.id,
+                                                height = imageDetails.drawable.intrinsicHeight,
+                                                width = imageDetails.drawable.intrinsicWidth
+                                            )
+                                        )
                                     }
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
@@ -182,7 +186,7 @@ fun QuerySearch(
     modifier: Modifier = Modifier,
     query: String,
     label: String,
-    onQueryChanged: (String) -> Unit
+    onQueryChanged: (String) -> Unit,
 ) {
 
     TextField(
@@ -207,7 +211,7 @@ fun QuerySearch(
 @Composable
 fun ShowAlertDialog(
     message: String,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
 ) {
     AlertDialog(
         onDismissRequest = {

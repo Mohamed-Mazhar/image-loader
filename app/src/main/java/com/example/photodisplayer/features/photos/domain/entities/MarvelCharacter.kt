@@ -5,6 +5,6 @@ data class MarvelCharacter(
     val name: String,
     val caption: String,
     val imagePath: String,
-    val height: Double? = null,
-    val width: Double? = null
+    val height: Int? = null,
+    val width: Int? = null
 )

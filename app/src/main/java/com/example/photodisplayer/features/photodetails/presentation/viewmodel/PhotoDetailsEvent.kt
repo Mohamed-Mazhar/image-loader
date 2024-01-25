@@ -5,4 +5,7 @@ sealed class PhotoDetailsEvent {
     data class CaptionChanged(val text: String) : PhotoDetailsEvent()
     data object UpdatePhotoDetails : PhotoDetailsEvent()
     data object CompressPhoto : PhotoDetailsEvent()
+    data class UpdatePhotoWidth(val width: String): PhotoDetailsEvent()
+    data class UpdatePhotoHeight(val height: String): PhotoDetailsEvent()
+
 }

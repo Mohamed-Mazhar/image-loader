@@ -10,7 +10,9 @@ object MarvelCharacterViewEntityMapper {
             name = marvelCharacter.name,
             imagePath = marvelCharacter.imagePath,
             caption = marvelCharacter.caption,
-            ellipsizedCaption = getEllipsizedText(marvelCharacter.caption)
+            ellipsizedCaption = getEllipsizedText(marvelCharacter.caption),
+            width = marvelCharacter.width,
+            height = marvelCharacter.height
         )
     }
 
