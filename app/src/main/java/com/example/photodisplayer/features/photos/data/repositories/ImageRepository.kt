@@ -1,10 +1,11 @@
 package com.example.photodisplayer.features.photos.data.repositories
 
+import android.util.Log
 import com.example.photodisplayer.common.network.ApiHandler
 import com.example.photodisplayer.features.photos.data.datasources.api.MarvelWebService
 import com.example.photodisplayer.features.photos.data.datasources.database.PhotosDao
-import com.example.photodisplayer.features.photos.data.mappers.MarvelCharacterDataMapper
-import com.example.photodisplayer.features.photos.domain.entities.MarvelCharacter
+import com.example.photodisplayer.features.photos.data.mappers.ImageDataMapper
+import com.example.photodisplayer.features.photos.domain.entities.Image
 
 
 class ImageRepository(
@@ -15,28 +16,35 @@ class ImageRepository(
     suspend fun getMarvelCharacters() = handleGetRequestResponse(
         marvelWebService::getMarvelCharacters
     ) {
-        MarvelCharacterDataMapper.toEntities(
+        ImageDataMapper.toEntities(
             marvelCharacterDataModels = it.marvelData.results
         )
     }
 
-    suspend fun addPhotos(marvelCharacters: List<MarvelCharacter>) {
-        val databaseEntities = MarvelCharacterDataMapper.toDatabaseEntity(marvelCharacters = marvelCharacters)
+    suspend fun addPhotos(images: List<Image>) {
+        val databaseEntities = ImageDataMapper.toDatabaseEntity(images = images)
         photosDao.addPhotos(databaseEntities)
     }
 
-    suspend fun updatePhoto(marvelCharacter: MarvelCharacter) {
-        val databaseEntity = MarvelCharacterDataMapper.toDatabaseEntity(marvelCharacter)
+    suspend fun updatePhoto(image: Image) {
+        val databaseEntity = ImageDataMapper.toDatabaseEntity(image)
         photosDao.updatePhoto(databaseEntity)
     }
 
-    suspend fun getSavedPhotos() : List<MarvelCharacter> {
+    suspend fun getSavedPhotos() : List<Image> {
         val databaseEntities = photosDao.getPhotos()
-        return MarvelCharacterDataMapper.fromDatabaseEntities(databaseEntities)
+        return ImageDataMapper.fromDatabaseEntities(databaseEntities)
     }
 
-    suspend fun getPhotoById(id: String): MarvelCharacter {
+    suspend fun getPhotoById(id: String): Image {
         val databaseEntity = photosDao.getById(id)
-        return MarvelCharacterDataMapper.fromDatabaseEntity(databaseEntity)
+        Log.d("ImageRepository", "Retrieving image $id")
+        return ImageDataMapper.fromDatabaseEntity(databaseEntity)
+    }
+
+    suspend fun addPhoto(image: Image) {
+        val databaseEntity = ImageDataMapper.toDatabaseEntity(image = image)
+        Log.d("ImageRepository", "Added image ${databaseEntity.id}")
+        photosDao.addPhoto(databaseEntity)
     }
 }

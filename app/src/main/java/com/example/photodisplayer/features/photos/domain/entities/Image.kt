@@ -1,6 +1,6 @@
 package com.example.photodisplayer.features.photos.domain.entities
 
-data class MarvelCharacter(
+data class Image(
     val id: String,
     val name: String,
     val caption: String,

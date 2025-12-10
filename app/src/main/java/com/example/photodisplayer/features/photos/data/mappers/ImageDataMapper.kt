@@ -3,13 +3,13 @@ package com.example.photodisplayer.features.photos.data.mappers
 import com.example.photodisplayer.common.util.toHttps
 import com.example.photodisplayer.features.photos.data.datasources.database.PhotoDatabaseEntity
 import com.example.photodisplayer.features.photos.data.models.MarvelCharacterDataModel
-import com.example.photodisplayer.features.photos.domain.entities.MarvelCharacter
+import com.example.photodisplayer.features.photos.domain.entities.Image
 
-object MarvelCharacterDataMapper {
+object ImageDataMapper {
 
-    fun toEntities(marvelCharacterDataModels: List<MarvelCharacterDataModel>): List<MarvelCharacter> {
+    fun toEntities(marvelCharacterDataModels: List<MarvelCharacterDataModel>): List<Image> {
         return marvelCharacterDataModels.map {
-            MarvelCharacter(
+            Image(
                 id = it.id,
                 name = it.name,
                 caption = it.description,
@@ -18,13 +18,13 @@ object MarvelCharacterDataMapper {
         }
     }
 
-    fun fromDatabaseEntities(databaseEntities: List<PhotoDatabaseEntity>): List<MarvelCharacter> {
+    fun fromDatabaseEntities(databaseEntities: List<PhotoDatabaseEntity>): List<Image> {
         return databaseEntities.map {
             fromDatabaseEntity(it)
         }
     }
 
-    fun fromDatabaseEntity(databaseEntity: PhotoDatabaseEntity) = MarvelCharacter(
+    fun fromDatabaseEntity(databaseEntity: PhotoDatabaseEntity) = Image(
         id = databaseEntity.id,
         name = databaseEntity.name,
         caption = databaseEntity.description,
@@ -33,20 +33,20 @@ object MarvelCharacterDataMapper {
         width = databaseEntity.width
     )
 
-    fun toDatabaseEntity(marvelCharacters: List<MarvelCharacter>): List<PhotoDatabaseEntity> {
-        return marvelCharacters.map {
-            toDatabaseEntity(marvelCharacter = it)
+    fun toDatabaseEntity(images: List<Image>): List<PhotoDatabaseEntity> {
+        return images.map {
+            toDatabaseEntity(image = it)
         }
     }
 
-    fun toDatabaseEntity(marvelCharacter: MarvelCharacter): PhotoDatabaseEntity {
+    fun toDatabaseEntity(image: Image): PhotoDatabaseEntity {
         return PhotoDatabaseEntity(
-            id = marvelCharacter.id,
-            name = marvelCharacter.name,
-            url = marvelCharacter.imagePath,
-            description = marvelCharacter.caption,
-            height = marvelCharacter.height,
-            width = marvelCharacter.width,
+            id = image.id,
+            name = image.name,
+            url = image.imagePath,
+            description = image.caption,
+            height = image.height,
+            width = image.width,
         )
     }
 

@@ -1,6 +1,6 @@
 package com.example.photodisplayer.features.photos.presentation.viewmodel.viewentity
 
-data class MarvelCharacterViewEntity(
+data class PhotoViewEntity(
     val id: String,
     val name: String,
     val ellipsizedCaption: String,

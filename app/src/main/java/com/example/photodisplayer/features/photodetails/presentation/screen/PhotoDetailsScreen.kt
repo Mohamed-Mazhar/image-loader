@@ -1,7 +1,6 @@
 package com.example.photodisplayer.features.photodetails.presentation.screen
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,7 +14,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.CircularProgressIndicator
@@ -36,7 +34,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -84,10 +81,10 @@ fun PhotoDetailsScreen(
     ) {
         AsyncImage(
             modifier = Modifier
-                .width(photoDetailsViewModel.state.marvelCharacter?.width?.dp ?: 0.dp)
-                .height(photoDetailsViewModel.state.marvelCharacter?.height?.dp ?: 0.dp),
+                .width(photoDetailsViewModel.state.image?.width?.dp ?: 0.dp)
+                .height(photoDetailsViewModel.state.image?.height?.dp ?: 0.dp),
             model = ImageRequest.Builder(LocalContext.current)
-                .data(photoDetailsViewModel.state.marvelCharacter?.imagePath)
+                .data(photoDetailsViewModel.state.image?.imagePath)
                 .allowHardware(false)
                 .build(),
             contentDescription = null,
@@ -100,7 +97,7 @@ fun PhotoDetailsScreen(
         )
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
-            value = photoDetailsViewModel.state.marvelCharacter?.caption ?: "",
+            value = photoDetailsViewModel.state.image?.caption ?: "",
             onValueChange = {
                 photoDetailsViewModel.onEvent(PhotoDetailsEvent.CaptionChanged(it))
             },
@@ -125,8 +122,8 @@ fun PhotoDetailsScreen(
                 fontWeight = FontWeight.Bold
             ),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = if (photoDetailsViewModel.state.marvelCharacter?.caption.isNullOrBlank()) Color.Red else Color.Black,
-                unfocusedBorderColor = if (photoDetailsViewModel.state.marvelCharacter?.caption.isNullOrBlank()) Color.Red else Color.Black
+                focusedBorderColor = if (photoDetailsViewModel.state.image?.caption.isNullOrBlank()) Color.Red else Color.Black,
+                unfocusedBorderColor = if (photoDetailsViewModel.state.image?.caption.isNullOrBlank()) Color.Red else Color.Black
             )
 
         )
@@ -150,8 +147,8 @@ fun PhotoDetailsScreen(
         }
         Spacer(modifier = Modifier.height(8.dp))
         ImageHeightAndWidth(
-            width = photoDetailsViewModel.state.marvelCharacter?.width,
-            height = photoDetailsViewModel.state.marvelCharacter?.height,
+            width = photoDetailsViewModel.state.image?.width,
+            height = photoDetailsViewModel.state.image?.height,
             onWidthChanged = {
                 photoDetailsViewModel.onEvent(PhotoDetailsEvent.UpdatePhotoWidth(it))
             },

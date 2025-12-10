@@ -11,6 +11,9 @@ interface PhotosDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addPhotos(photoDatabaseEntity: List<PhotoDatabaseEntity>)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun addPhoto(photoDatabaseEntity: PhotoDatabaseEntity)
+
     @Update
     suspend fun updatePhoto(photoDatabaseEntity: PhotoDatabaseEntity)
 

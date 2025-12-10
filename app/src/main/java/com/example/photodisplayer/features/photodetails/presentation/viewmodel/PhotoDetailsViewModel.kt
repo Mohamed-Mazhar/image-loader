@@ -58,9 +58,9 @@ class PhotoDetailsViewModel(
     }
 
     private fun updateWidth(width: Int) {
-        state.marvelCharacter?.let {
+        state.image?.let {
             state = state.copy(
-                marvelCharacter = it.copy(
+                image = it.copy(
                     width = width,
                     height = width.times(1 / aspectRatio).toInt()
                 )
@@ -69,9 +69,9 @@ class PhotoDetailsViewModel(
     }
 
     private fun updateHeight(height: Int) {
-        state.marvelCharacter?.let {
+        state.image?.let {
             state = state.copy(
-                marvelCharacter = it.copy(
+                image = it.copy(
                     height = height,
                     width = height.times(aspectRatio).toInt()
                 )
@@ -80,7 +80,7 @@ class PhotoDetailsViewModel(
     }
 
     private suspend fun compressImage() {
-        state.marvelCharacter?.imagePath?.let {
+        state.image?.imagePath?.let {
             state = state.copy(isLoading = true)
             val compressedUrl = compressImageUsecase.execute(imageUrl = it)
             state = state.copy(isLoading = false)
@@ -89,7 +89,7 @@ class PhotoDetailsViewModel(
     }
 
     private suspend fun updatePhoto() {
-        state.marvelCharacter?.let {
+        state.image?.let {
             updatePhotoDetailsUsecase.execute(it)
         }
         state = state.copy(updateCompleted = true)
@@ -97,7 +97,7 @@ class PhotoDetailsViewModel(
 
     private fun updatePhotoCaption(caption: String) {
         state = state.copy(
-            marvelCharacter = state.marvelCharacter?.copy(
+            image = state.image?.copy(
                 caption = caption
             )
         )
@@ -105,7 +105,7 @@ class PhotoDetailsViewModel(
 
     private suspend fun getPhotoDetails(id: String) {
         val photoDetails = getPhotoByIdUsecase.execute(id)
-        state = state.copy(marvelCharacter = photoDetails)
+        state = state.copy(image = photoDetails)
         if (photoDetails.height != null && photoDetails.width != null) {
             aspectRatio = (photoDetails.width.toDouble() / photoDetails.height)
         }

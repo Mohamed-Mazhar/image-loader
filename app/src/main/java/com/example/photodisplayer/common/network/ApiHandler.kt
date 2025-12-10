@@ -1,6 +1,7 @@
 package com.example.photodisplayer.common.network
 
 
+import android.util.Log
 import retrofit2.HttpException
 import retrofit2.Response
 import kotlin.reflect.KSuspendFunction1
@@ -14,10 +15,12 @@ abstract class ApiHandler {
             val response = execute()
             checkResponse(response, map)
         } catch (e: HttpException) {
+            Log.d("ErrorHanlder", "HttpException received $e")
             ApiResponse.Error(
                 WebserviceException(code = e.code(), errorMessage = e.message(), description = "")
             )
         } catch (e: Throwable) {
+            Log.d("ErrorHanlder", "Error received $e")
             ApiResponse.Error(e)
         }
     }

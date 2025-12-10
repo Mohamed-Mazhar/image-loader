@@ -2,6 +2,10 @@
 
 package com.example.photodisplayer.features.photos.presentation.screen
 
+import android.content.Intent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -42,6 +46,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -60,6 +65,8 @@ import com.example.photodisplayer.common.theme.Purple80
 import com.example.photodisplayer.common.ui.Screen
 import com.example.photodisplayer.features.photos.presentation.viewmodel.PhotosScreenEvent
 import com.example.photodisplayer.features.photos.presentation.viewmodel.PhotosViewModel
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -68,6 +75,16 @@ fun PhotoListScreen(
     navController: NavController,
     photosViewModel: PhotosViewModel = viewModel(factory = PhotosViewModel.Factory),
 ) {
+
+    val context = LocalContext.current
+    val photoPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia(),
+        onResult = {
+            val resolver = context.contentResolver
+            resolver.takePersistableUriPermission(it!!, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            photosViewModel.onEvent(PhotosScreenEvent.ImageGalleySelected(it))
+        }
+    )
     val pullRefreshState = rememberPullRefreshState(
         refreshing = photosViewModel.state.isLoading,
         onRefresh = {
@@ -97,7 +114,9 @@ fun PhotoListScreen(
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = {},
+                onClick = {
+                    photoPickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                },
                 shape = CircleShape
             ) {
                 Icon(Icons.Filled.Add, "")
@@ -124,8 +143,9 @@ fun PhotoListScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable {
+                                    val encoded = URLEncoder.encode(it.id, StandardCharsets.UTF_8)
                                     navController.navigate(
-                                        Screen.PhotoDetailsScreen.route.replace("{id}", it.id)
+                                        Screen.PhotoDetailsScreen.route.replace("{id}", encoded)
                                     )
                                 }
                         ) {
@@ -149,13 +169,15 @@ fun PhotoListScreen(
                                     placeholder = rememberVectorPainter(image = Icons.Default.Person),
                                     onSuccess = { imageState ->
                                         val imageDetails = imageState.result
-                                        photosViewModel.onEvent(
-                                            event = PhotosScreenEvent.UpdatePhotoDetails(
-                                                photoId = it.id,
-                                                height = imageDetails.drawable.intrinsicHeight,
-                                                width = imageDetails.drawable.intrinsicWidth
+                                        if (it.height == null && it.width == null) {
+                                            photosViewModel.onEvent(
+                                                event = PhotosScreenEvent.UpdatePhotoDetails(
+                                                    photoId = it.id,
+                                                    height = imageDetails.drawable.intrinsicHeight,
+                                                    width = imageDetails.drawable.intrinsicWidth
+                                                )
                                             )
-                                        )
+                                        }
                                     }
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))

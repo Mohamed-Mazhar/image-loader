@@ -1,5 +1,6 @@
 package com.example.photodisplayer.features.photos.presentation.viewmodel
 
+import android.net.Uri
 import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -10,13 +11,17 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.photodisplayer.common.network.WebserviceException
+import com.example.photodisplayer.features.photos.dependencies.usecases.AddImageUsecaseProvider
 import com.example.photodisplayer.features.photos.dependencies.usecases.GetMarvelCharactersUsecaseProvider
 import com.example.photodisplayer.features.photos.dependencies.usecases.RefreshMarvelCharactersUsecaseProvider
 import com.example.photodisplayer.features.photos.dependencies.usecases.UpdateImageWidthAndHeightUsecaseProvider
+import com.example.photodisplayer.features.photos.domain.entities.Image
+import com.example.photodisplayer.features.photos.domain.usecases.AddImageUsecase
 import com.example.photodisplayer.features.photos.domain.usecases.GetMarvelCharactersUsecase
 import com.example.photodisplayer.features.photos.domain.usecases.RefreshMarvelCharactersUsecase
 import com.example.photodisplayer.features.photos.domain.usecases.UpdateImageWidthAndHeight
-import com.example.photodisplayer.features.photos.presentation.viewmodel.viewentity.MarvelCharacterViewEntityMapper
+import com.example.photodisplayer.features.photos.presentation.viewmodel.viewentity.PhotoViewEntity
+import com.example.photodisplayer.features.photos.presentation.viewmodel.viewentity.PhotoViewEntityMapper
 import kotlinx.coroutines.launch
 import java.util.Locale
 
@@ -24,6 +29,7 @@ class PhotosViewModel(
     private val getPhotosUsecase: GetMarvelCharactersUsecase,
     private val refreshMarvelCharactersUsecase: RefreshMarvelCharactersUsecase,
     private val updateImageWidthAndHeight: UpdateImageWidthAndHeight,
+    private val addImageUseccase: AddImageUsecase,
 ) : ViewModel() {
 
     var state by mutableStateOf(PhotosScreenState())
@@ -35,10 +41,12 @@ class PhotosViewModel(
                 val getPhotosUsecase = GetMarvelCharactersUsecaseProvider.get()
                 val refreshMarvelCharactersUsecase = RefreshMarvelCharactersUsecaseProvider.get()
                 val updateImageWidthAndHeight = UpdateImageWidthAndHeightUsecaseProvider.get()
+                val addImageUseccase = AddImageUsecaseProvider.get()
                 PhotosViewModel(
                     getPhotosUsecase = getPhotosUsecase,
                     refreshMarvelCharactersUsecase = refreshMarvelCharactersUsecase,
-                    updateImageWidthAndHeight = updateImageWidthAndHeight
+                    updateImageWidthAndHeight = updateImageWidthAndHeight,
+                    addImageUseccase = addImageUseccase,
                 )
             }
         }
@@ -50,20 +58,39 @@ class PhotosViewModel(
                 is PhotosScreenEvent.SearchFieldChangedEvent -> {
                     updateFilteredList(query = event.text)
                 }
+
                 is PhotosScreenEvent.RefreshPageEvent -> {
                     refreshCharacters()
                 }
+
                 is PhotosScreenEvent.ScreenLaunchedEvent -> loadPhotos()
                 is PhotosScreenEvent.DismissErrorDialog -> state = state.copy(errorMessage = "")
                 is PhotosScreenEvent.UpdatePhotoDetails -> updateWidthAndHeight(event.photoId, event.width, event.height)
+                is PhotosScreenEvent.ImageGalleySelected -> updateGalleryImage(event.photoUri)
             }
         }
+    }
+
+    private suspend fun updateGalleryImage(photoUri: Uri?) {
+        val image = Image(
+            imagePath = photoUri.toString(),
+            id = photoUri.toString(),
+            name = "",
+            caption = "No caption",
+            height = null,
+            width = null
+        )
+        addImageUseccase.add(image)
+//        val updatedPhotos = listOf(PhotoViewEntityMapper.toViewEntity(image)) + state.photos
+//        state = state.copy(
+//            photos = updatedPhotos,
+//            filteredPhotos = updatedPhotos
+//        )
     }
 
     private suspend fun updateWidthAndHeight(photoId: String, width: Int, height: Int) {
         Log.d("Marvel", "Updating photo size $height and $width")
         updateImageWidthAndHeight.execute(photoId, width, height)
-        loadPhotos()
     }
 
     private suspend fun loadPhotos() {
@@ -72,7 +99,8 @@ class PhotosViewModel(
             refreshCharacters()
         } else {
             val viewEntities = photos.map {
-                MarvelCharacterViewEntityMapper.toViewEntity(it)
+                Log.d("ImageLoaded", "Loaded image id is ${it.id}")
+                PhotoViewEntityMapper.toViewEntity(it)
             }
             state = state.copy(photos = viewEntities, isLoading = false, filteredPhotos = viewEntities)
         }
@@ -84,11 +112,12 @@ class PhotosViewModel(
             refreshMarvelCharactersUsecase.execute()
             val photos = getPhotosUsecase.execute()
             val viewEntities = photos.map {
-                MarvelCharacterViewEntityMapper.toViewEntity(it)
+                PhotoViewEntityMapper.toViewEntity(it)
             }
             state.copy(photos = viewEntities, isLoading = false, filteredPhotos = viewEntities)
-        } catch (e: WebserviceException) {
-            state.copy(errorMessage = e.errorMessage, isLoading = false)
+        } catch (e: Exception) {
+            Log.d("PhotosViewModel", "Error received $e")
+            state.copy(errorMessage = e.message ?: "", isLoading = false)
         }
     }
 
